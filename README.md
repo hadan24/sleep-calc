@@ -17,4 +17,10 @@ wanted to make a CLI version so that I can calculate my sleep needs without an i
 ## Planned Features
 - the original 2 (calculate bedtimes from wake-up time, calculate wake-up times from current bedtime)
 - find wake-up times from _chosen_ bedtime
-- finding all of that for power naps (_note: research power nap lengths_)
+- finding all the above for power naps (_note: research power nap lengths_)
+- given a proposed bedtime and wake-up time, calculate how many cycles can fit in
+
+## Resources For Myself
+- https://docs.rs/time/latest/time/
+- https://rust-cli.github.io/book/tutorial/cli-args.html
+- https://docs.rs/clap/latest/clap/
