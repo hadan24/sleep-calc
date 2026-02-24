@@ -10,9 +10,9 @@ I deal with this a lot in my struggle to maintain a consistent sleep schedule (l
 This sleep calculator will be a quick and easy way for me to ensure I wake up at the right times
 in my cycle. I hope it helps you too if you decide to use it!
 
-This is blatantly inspired by https://sleepcalculator.com/, which I've been using. However, I
-wanted to make a CLI version so that I can calculate my sleep needs without an internet connection
-:)). This also lets me add some more features that I've been wanting.
+This is blatantly inspired by https://sleepcalculator.com/, which I've been using for a while. 
+However, I wanted to make a CLI version so that I can calculate my sleep needs without an internet
+connection :)). This also lets me add some more features that I've been wanting.
 
 ## Planned Features
 - the original 2 (calculate bedtimes from wake-up time, calculate wake-up times from current bedtime)
