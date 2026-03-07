@@ -18,7 +18,16 @@ fn main() {
     }
     // default behavior: given bedtime of now, calculate wakeup times
     else {
-        initial_test();
+        let now = time::OffsetDateTime::now_local()
+            .expect("Could not get timezone offset.")
+            .time();
+        println!("Bedtime: {}", sleep_calc::format_time(&now, &config.format_options()));
+        let cycles: Vec<sleep_calc::CyclePair> = sleep_calc::get_wakeup_times(&now, &config.format_options());
+        let rows: Vec<_> = cycles.into_iter()
+            .map(|r| r.cell())
+            .collect();
+        let table = sleep_calc::build_table(rows, "Wake-Up Time");
+        println!("{}", table);
     }
 }
 
@@ -37,22 +46,8 @@ struct Config {
     #[arg(short, long, default_value_t = false)]
     mode24: bool
 }
-
-fn initial_test() {
-    let now = time::OffsetDateTime::now_local()
-        .expect("Could not get timezone offset.")
-        .truncate_to_second()
-        .time();
-    println!("\nCurrent time: {}", now);
-
-    let rows: Vec<_> = sleep_calc::get_wakeup_times(&now)
-        .into_iter()
-        .map(|r| {
-            use cli_table::{Cell, format::Justify};
-            vec![r.0.cell().justify(Justify::Right), r.1.cell()]
-        })
-        .collect();
-    let table = sleep_calc::build_table(rows, "Wake-Up Time");
-
-    println!("{}", table);
+impl Config {
+    fn format_options(&self) -> sleep_calc::FormatOptions {
+        sleep_calc::FormatOptions { mode24: self.mode24 }
+    }
 }
