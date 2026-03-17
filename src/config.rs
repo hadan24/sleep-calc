@@ -6,18 +6,18 @@ pub struct Config {
     pub bedtime: Option<String>,
 
     #[arg(short, long)]
-    pub wakeup: Option<String>,
+    pub waketime: Option<String>,
 
     #[arg(short, long, default_value_t = false)]
     pub nap: bool,
 
     // 12-hour mode (default) or 24-hour mode
-    #[arg(short, long, default_value_t = false)]
-    pub mode24: bool
+    #[arg(short = 'm', long, default_value_t = false)]
+    pub output_mode: bool
 }
 impl Config {
     pub fn format_options(&self) -> FormatOptions {
-        FormatOptions { mode24: self.mode24 }
+        FormatOptions { mode24: self.output_mode }
     }
 }
 

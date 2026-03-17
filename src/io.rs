@@ -11,15 +11,28 @@ w/ am/pm
 */
 pub fn parse_time(s: String) -> Result<Time, Box<dyn std::error::Error>> {
     let s = s.trim().to_lowercase();
-    let suffix = s.strip_suffix("am").or_else(|| s.strip_suffix("pm"));
+    let suffixes = ["am", "pm"];
+    let (s, found_suffix) = suffixes.iter()
+        // apply callable that returns Option on each iter element/
+        // return 1st non-None item, or None itself if all were None
+        .find_map(|&suffix| {
+            s.strip_suffix(suffix)
+                .map(|stripped| (stripped.to_string(), Some(suffix)))
+        })
+        .unwrap_or((s, None));  // unwrap find_map Option or set to default value
     let mut it = s.split(":");
 
-    match suffix {
+    match found_suffix {
         Some(suffix) => {
             let h = if suffix == "am" {
-                it.next().unwrap().parse::<u8>()?
+                let temp = it.next().unwrap().parse::<u8>()?;
+                if temp == 12 {
+                    temp - 12
+                } else {
+                    temp
+                }
             } else {
-                it.next().unwrap().parse::<u8>()? + 12
+                (it.next().unwrap().parse::<u8>()? + 12) % 24
             };
             Ok(Time::from_hms(h, it.next().unwrap().parse()?, 0)?)
         },
