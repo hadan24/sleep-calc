@@ -2,7 +2,7 @@ use time::{Duration, Time};
 use cli_table::{format, Cell};
 
 pub mod config;
-pub mod output;
+pub mod io;
 
 const FALL_ASLEEP: Duration = Duration::minutes(15);
 const CYCLE: Duration = Duration::minutes(90);
@@ -19,7 +19,7 @@ pub fn get_wakeup_times(bedtime: &Time, format_options: &config::FormatOptions) 
     (1..7u8).rev()
         .map(|i| {
             let sleep_time = sleep_time + i*CYCLE;
-            CyclePair(i, output::format_time(&sleep_time, format_options))
+            CyclePair(i, io::format_time(&sleep_time, format_options))
         })
         .collect()
 }
@@ -29,7 +29,7 @@ pub fn get_bedtimes(wakeup: &Time, format_options: &config::FormatOptions) -> Ve
     (1..7u8).rev()
         .map(|i| {
             let sleep_time = sleep_offset - i*CYCLE;
-            CyclePair(i, output::format_time(&sleep_time, format_options))
+            CyclePair(i, io::format_time(&sleep_time, format_options))
         })
         .collect()
 }

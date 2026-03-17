@@ -27,11 +27,11 @@ fn main() {
             }
         };
 
-        println!("Bedtime: {}", output::format_time(&now, &config.format_options()));
+        println!("Bedtime: {}", io::format_time(&now, &config.format_options()));
         let cycles: Vec<CyclePair> = get_wakeup_times(&now, &config.format_options());
         let rows: Vec<_> = cycles.into_iter()
             .map(|r| r.cell())
             .collect();
-        println!("{}", output::build_table(rows, "Wake-Up Time"));
+        println!("{}", io::build_table(rows, "Wake-Up Time"));
     }
 }
