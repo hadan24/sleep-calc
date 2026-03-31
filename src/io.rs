@@ -6,11 +6,37 @@ use cli_table::{format, Cell, Style, Table};
 
 
 pub fn parse_time(s: String) -> Result<Time, Box<dyn std::error::Error>> {
-    // prep valid fmts
-    // check against each
-    // propagate if all are Err
-    // otherwise ret Time
-    todo!()
+    let fmts = [
+        format_description!("[hour repr:12]:[minute] [period case_sensitive:false]"),
+        format_description!("[hour]:[minute]"),
+    ];
+    enum ParseResults {
+        FirstErr(time::error::Parse),
+        ParsedTime(time::Time),
+        Unknown
+    }
+    let mut res = ParseResults::Unknown;
+    for f in fmts {
+        match Time::parse(&s, f) {
+            Ok(parsed_time) => {
+                res = ParseResults::ParsedTime(parsed_time);
+                break;
+            }
+            Err(e) => match res {
+                ParseResults::Unknown => res = ParseResults::FirstErr(e),
+
+                // if is FirstErr, already found err to return, skip
+                // if is ParsedTime (should be impossible), already succesfully parsed, skip
+                _ => break
+            }
+        }
+    }
+    
+    match res {
+        ParseResults::FirstErr(e)   => Err(Box::new(e)),
+        ParseResults::ParsedTime(t) => Ok(t),
+        ParseResults::Unknown => Err("shouldn't be possible".into())
+    }
 }
 
 pub fn format_time(t: &Time, format_options: &crate::config::FormatOptions) ->
