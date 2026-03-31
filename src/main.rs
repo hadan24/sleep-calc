@@ -8,21 +8,35 @@ fn main() {
 
     match (config.bedtime, config.waketime) {
         // given bed & wakeup times, find how many cycles can fit
-        (Some(bedtime), Some(waketime)) => {
+        (Some(given_bedtime), Some(given_waketime)) => {
             use io::{format_time, parse_time};
-            let bedtime = format_time(&parse_time(bedtime).unwrap(), &fmt_opts);
-            let waketime = format_time(&parse_time(waketime).unwrap(), &fmt_opts);
+            let bedtime = format_time(&parse_time(given_bedtime).unwrap(), &fmt_opts).unwrap();
+            let waketime = format_time(&parse_time(given_waketime).unwrap(), &fmt_opts).unwrap();
             println!("bed: {bedtime}\nwake: {waketime}");
         },
 
         // given chosen wakeup time, calculate bedtimes
-        (None, Some(waketime)) => {
-            todo!()
+        (None, Some(given_waketime)) => {
+            let waketime = io::parse_time(given_waketime).unwrap();
+
+            println!("Bedtime: {}", io::format_time(&waketime, &fmt_opts).unwrap());
+            let cycles: Vec<CyclePair> = get_bedtimes(&waketime, &fmt_opts);
+            let rows: Vec<_> = cycles.into_iter()
+                .map(|r| r.cell())
+                .collect();
+            println!("{}", io::build_table(rows, "Bedtime"));
         },
 
         // given chosen bedtime, calculate wakeup times
-        (Some(bedtime), None) => {
-            todo!()
+        (Some(given_bedtime), None) => {
+            let bedtime = io::parse_time(given_bedtime).unwrap();
+
+            println!("Bedtime: {}", io::format_time(&bedtime, &fmt_opts).unwrap());
+            let cycles: Vec<CyclePair> = get_wakeup_times(&bedtime, &fmt_opts);
+            let rows: Vec<_> = cycles.into_iter()
+                .map(|r| r.cell())
+                .collect();
+            println!("{}", io::build_table(rows, "Wake-Up Time"));
         },
 
         // default behavior: given bedtime of now, calculate wakeup times
@@ -31,11 +45,11 @@ fn main() {
                 Ok(t) => t.time(),
                 Err(e) => {
                     eprintln!("Could not get timezone offset: {}", e);
-                    std::process::exit(1);
+                    return;
                 }
             };
 
-            println!("Bedtime: {}", io::format_time(&now, &fmt_opts));
+            println!("Bedtime: {}", io::format_time(&now, &fmt_opts).unwrap());
             let cycles: Vec<CyclePair> = get_wakeup_times(&now, &fmt_opts);
             let rows: Vec<_> = cycles.into_iter()
                 .map(|r| r.cell())

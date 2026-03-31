@@ -40,7 +40,7 @@ pub fn parse_time(s: String) -> Result<Time, Box<dyn std::error::Error>> {
 }
 
 pub fn format_time(t: &Time, format_options: &crate::config::FormatOptions) ->
-    String  //Result<String, Box<dyn std::error::Error>> 
+    Result<String, Box<dyn std::error::Error>> 
 {
     let fmt_desc = if format_options.mode24 {
         format_description!("[hour padding:space]:[minute]")
@@ -48,7 +48,7 @@ pub fn format_time(t: &Time, format_options: &crate::config::FormatOptions) ->
     else {
         format_description!("[hour padding:space repr:12]:[minute] [period case:upper]")
     };
-    t.format(fmt_desc).unwrap()
+    Ok(t.format(fmt_desc)?)
 }
 
 pub fn build_table(rows: Vec<Vec<cli_table::CellStruct>>, times_col_title: &str)
