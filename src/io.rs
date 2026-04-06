@@ -1,46 +1,35 @@
 use time::{
     Time,
+    error::{
+        Format as TimeFormattingError,
+        Parse as TimeParseError
+    },
     macros::format_description
 };
 use cli_table::{format, Cell, Style, Table};
 
 
-pub fn parse_time(s: &str) -> Result<Time, Box<dyn std::error::Error>> {
+pub fn parse_time(s: &str) -> Result<Time, TimeParseError> {
+    let s = s.trim();
+    let mut first_err = None;
     let fmts = [
         format_description!("[hour repr:12 padding:none]:[minute] [period case_sensitive:false]"),
         format_description!("[hour padding:none]:[minute]"),
     ];
-    enum ParseResults {
-        FirstErr(time::error::Parse),
-        ParsedTime(time::Time),
-        Unknown
-    }
-    let mut res = ParseResults::Unknown;
-    for f in fmts {
-        match Time::parse(&s.trim(), f) {
-            Ok(parsed_time) => {
-                res = ParseResults::ParsedTime(parsed_time);
-                break;
-            }
-            Err(e) => match res {
-                ParseResults::Unknown => res = ParseResults::FirstErr(e),
 
-                // if is FirstErr, already found err to return, skip
-                // if is ParsedTime (should be impossible), already succesfully parsed, skip
-                _ => break
-            }
-        }
+    for f in fmts {
+        match Time::parse(s, f) {
+            Ok(t) => return Ok(t),
+            Err(e) => first_err.get_or_insert(e)
+        };
     }
     
-    match res {
-        ParseResults::FirstErr(e)   => Err(Box::new(e)),
-        ParseResults::ParsedTime(t) => Ok(t),
-        ParseResults::Unknown => Err("shouldn't be possible".into())
-    }
+    // only get here if NO formats matched, error guaranteed exists
+    Err(first_err.unwrap())
 }
 
 pub fn format_time(t: &Time, format_options: &crate::config::FormatOptions) ->
-    Result<String, Box<dyn std::error::Error>> 
+    Result<String, TimeFormattingError> 
 {
     let fmt_desc = match (format_options.mode24, format_options.with_padding) {
         (true, true)    => format_description!("[hour padding:space]:[minute]"),
