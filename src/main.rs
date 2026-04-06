@@ -9,10 +9,14 @@ fn main() {
     match (config.bedtime, config.waketime) {
         // given bed & wakeup times, find how many cycles can fit
         (Some(given_bedtime), Some(given_waketime)) => {
-            use io::{format_time, parse_time};
-            let bedtime = format_time(&parse_time(&given_bedtime).unwrap(), &fmt_opts).unwrap();
-            let waketime = format_time(&parse_time(&given_waketime).unwrap(), &fmt_opts).unwrap();
-            println!("bed: {bedtime}\nwake: {waketime}");
+            let bedtime = io::parse_time(&given_bedtime).unwrap();
+            let waketime = io::parse_time(&given_waketime).unwrap();
+            println!(
+                "Maximum number of cycles you can fit in between {} and {}:\n{}",
+                io::format_time(&bedtime, &fmt_opts).unwrap(),
+                io::format_time(&waketime, &fmt_opts).unwrap(),
+                get_max_cycles_between(&bedtime, &waketime)
+            )
         },
 
         // given chosen wakeup time, calculate bedtimes

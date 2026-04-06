@@ -33,3 +33,10 @@ pub fn get_bedtimes(waketime: &Time, format_options: &config::FormatOptions) -> 
         })
         .collect()
 }
+
+pub fn get_max_cycles_between(bedtime: &Time, waketime: &Time) -> u8 {
+    let sleep_start = *bedtime + FALL_ASLEEP;
+    let sleep_time = sleep_start.duration_until(*waketime);
+    
+    (sleep_time / CYCLE) as u8
+}
