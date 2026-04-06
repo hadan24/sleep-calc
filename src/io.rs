@@ -42,9 +42,11 @@ pub fn parse_time(s: &str) -> Result<Time, Box<dyn std::error::Error>> {
 pub fn format_time(t: &Time, format_options: &crate::config::FormatOptions) ->
     Result<String, Box<dyn std::error::Error>> 
 {
-    let fmt_desc = match format_options.mode24 {
-        true    => format_description!("[hour padding:space]:[minute]"),
-        false   => format_description!("[hour padding:space repr:12]:[minute] [period case:upper]")
+    let fmt_desc = match (format_options.mode24, format_options.with_padding) {
+        (true, true)    => format_description!("[hour padding:space]:[minute]"),
+        (true, false)   => format_description!("[hour padding:none]:[minute]"),
+        (false, true)   => format_description!("[hour padding:space repr:12]:[minute] [period case:upper]"),
+        (false, false)  => format_description!("[hour padding:none repr:12]:[minute] [period case:upper]")
     };
     Ok(t.format(fmt_desc)?)
 }

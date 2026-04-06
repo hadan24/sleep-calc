@@ -15,13 +15,13 @@ impl CyclePair {
 }
 
 pub fn get_wakeup_times(bedtime: &Time, format_options: &config::FormatOptions) -> Vec<CyclePair> {
-    let sleep_time = *bedtime + FALL_ASLEEP + CYCLE;
+    let sleep_time = *bedtime + FALL_ASLEEP;
     (1..7u8).rev()
         .map(|i| {
             let sleep_time = sleep_time + i*CYCLE;
             let fmt_time = match i {
                 ..=4 => format!("{}", io::format_time(&sleep_time, format_options).unwrap()),
-                5.. => format!("{} (ideal!)", io::format_time(&sleep_time, format_options).unwrap())
+                5.. => format!("{} (recommended!)", io::format_time(&sleep_time, format_options).unwrap())
             };
             CyclePair(i, fmt_time)
         })
@@ -35,16 +35,18 @@ pub fn get_bedtimes(waketime: &Time, format_options: &config::FormatOptions) -> 
             let sleep_time = sleep_offset - i*CYCLE;
             let fmt_time = match i {
                 ..=4 => format!("{}", io::format_time(&sleep_time, format_options).unwrap()),
-                5.. => format!("{} (ideal!)", io::format_time(&sleep_time, format_options).unwrap())
+                5.. => format!("{} (recommended!)", io::format_time(&sleep_time, format_options).unwrap())
             };
             CyclePair(i, fmt_time)
         })
         .collect()
 }
 
-pub fn get_max_cycles_between(bedtime: &Time, waketime: &Time) -> u8 {
+pub fn get_max_cycles_between(bedtime: &Time, waketime: &Time) -> (u8, Time) {
     let sleep_start = *bedtime + FALL_ASLEEP;
     let sleep_time = sleep_start.duration_until(*waketime);
+
+    let cycles = (sleep_time / CYCLE) as u8;
     
-    (sleep_time / CYCLE) as u8
+    (cycles, sleep_start + CYCLE*cycles)
 }
