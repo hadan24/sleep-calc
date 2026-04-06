@@ -24,8 +24,8 @@ pub fn get_wakeup_times(bedtime: &Time, format_options: &config::FormatOptions) 
         .collect()
 }
 
-pub fn get_bedtimes(wakeup: &Time, format_options: &config::FormatOptions) -> Vec<CyclePair> {
-    let sleep_offset = *wakeup - FALL_ASLEEP;
+pub fn get_bedtimes(waketime: &Time, format_options: &config::FormatOptions) -> Vec<CyclePair> {
+    let sleep_offset = *waketime - FALL_ASLEEP;
     (1..7u8).rev()
         .map(|i| {
             let sleep_time = sleep_offset - i*CYCLE;
