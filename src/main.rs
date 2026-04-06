@@ -23,12 +23,12 @@ fn main() {
         (None, Some(given_waketime)) => {
             let waketime = io::parse_time(&given_waketime).unwrap();
 
-            println!("Bedtime: {}", io::format_time(&waketime, &fmt_opts).unwrap());
+            println!("Wake-up time: {}", io::format_time(&waketime, &fmt_opts).unwrap());
             let cycles: Vec<CyclePair> = get_bedtimes(&waketime, &fmt_opts);
             let rows: Vec<_> = cycles.into_iter()
                 .map(|r| r.cell())
                 .collect();
-            println!("{}", io::build_table(rows, "Bedtime"));
+            println!("{}", io::build_table(rows, "Ideal Bedtimes"));
         },
 
         // given chosen bedtime, calculate wakeup times
@@ -40,7 +40,7 @@ fn main() {
             let rows: Vec<_> = cycles.into_iter()
                 .map(|r| r.cell())
                 .collect();
-            println!("{}", io::build_table(rows, "Wake-Up Time"));
+            println!("{}", io::build_table(rows, "Ideal Wake Times"));
         },
 
         // default behavior: given bedtime of now, calculate wakeup times

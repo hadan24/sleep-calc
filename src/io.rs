@@ -43,8 +43,8 @@ pub fn format_time(t: &Time, format_options: &crate::config::FormatOptions) ->
     Result<String, Box<dyn std::error::Error>> 
 {
     let fmt_desc = match format_options.mode24 {
-        true    => format_description!("[hour padding:none]:[minute]"),
-        false   => format_description!("[hour padding:none repr:12]:[minute] [period case:upper]")
+        true    => format_description!("[hour padding:space]:[minute]"),
+        false   => format_description!("[hour padding:space repr:12]:[minute] [period case:upper]")
     };
     Ok(t.format(fmt_desc)?)
 }

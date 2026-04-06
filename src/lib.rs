@@ -19,7 +19,11 @@ pub fn get_wakeup_times(bedtime: &Time, format_options: &config::FormatOptions) 
     (1..7u8).rev()
         .map(|i| {
             let sleep_time = sleep_time + i*CYCLE;
-            CyclePair(i, io::format_time(&sleep_time, format_options).unwrap())
+            let fmt_time = match i {
+                ..=4 => format!("{}", io::format_time(&sleep_time, format_options).unwrap()),
+                5.. => format!("{} (ideal!)", io::format_time(&sleep_time, format_options).unwrap())
+            };
+            CyclePair(i, fmt_time)
         })
         .collect()
 }
@@ -29,7 +33,11 @@ pub fn get_bedtimes(waketime: &Time, format_options: &config::FormatOptions) -> 
     (1..7u8).rev()
         .map(|i| {
             let sleep_time = sleep_offset - i*CYCLE;
-            CyclePair(i, io::format_time(&sleep_time, format_options).unwrap())
+            let fmt_time = match i {
+                ..=4 => format!("{}", io::format_time(&sleep_time, format_options).unwrap()),
+                5.. => format!("{} (ideal!)", io::format_time(&sleep_time, format_options).unwrap())
+            };
+            CyclePair(i, fmt_time)
         })
         .collect()
 }
