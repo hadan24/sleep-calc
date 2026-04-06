@@ -13,11 +13,11 @@ pub struct Config {
 
     // 12-hour mode (default) or 24-hour mode
     #[arg(short = 'm', long, default_value_t = false)]
-    pub output_mode: bool
+    pub output_24hr_mode: bool
 }
 impl Config {
     pub fn format_options(&self) -> FormatOptions {
-        FormatOptions { mode24: self.output_mode }
+        FormatOptions { mode24: self.output_24hr_mode }
     }
 }
 
