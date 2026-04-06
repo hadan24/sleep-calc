@@ -10,14 +10,14 @@ fn main() {
         // given bed & wakeup times, find how many cycles can fit
         (Some(given_bedtime), Some(given_waketime)) => {
             use io::{format_time, parse_time};
-            let bedtime = format_time(&parse_time(given_bedtime).unwrap(), &fmt_opts).unwrap();
-            let waketime = format_time(&parse_time(given_waketime).unwrap(), &fmt_opts).unwrap();
+            let bedtime = format_time(&parse_time(&given_bedtime).unwrap(), &fmt_opts).unwrap();
+            let waketime = format_time(&parse_time(&given_waketime).unwrap(), &fmt_opts).unwrap();
             println!("bed: {bedtime}\nwake: {waketime}");
         },
 
         // given chosen wakeup time, calculate bedtimes
         (None, Some(given_waketime)) => {
-            let waketime = io::parse_time(given_waketime).unwrap();
+            let waketime = io::parse_time(&given_waketime).unwrap();
 
             println!("Bedtime: {}", io::format_time(&waketime, &fmt_opts).unwrap());
             let cycles: Vec<CyclePair> = get_bedtimes(&waketime, &fmt_opts);
@@ -29,7 +29,7 @@ fn main() {
 
         // given chosen bedtime, calculate wakeup times
         (Some(given_bedtime), None) => {
-            let bedtime = io::parse_time(given_bedtime).unwrap();
+            let bedtime = io::parse_time(&given_bedtime).unwrap();
 
             println!("Bedtime: {}", io::format_time(&bedtime, &fmt_opts).unwrap());
             let cycles: Vec<CyclePair> = get_wakeup_times(&bedtime, &fmt_opts);
