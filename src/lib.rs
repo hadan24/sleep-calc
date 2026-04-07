@@ -1,8 +1,9 @@
-use time::{Duration, Time};
-use cli_table::{format, Cell};
-
 pub mod config;
 pub mod io;
+
+use time::{Duration, Time};
+use cli_table::{format, Cell};
+use config::FormatOptions;
 
 const FALL_ASLEEP: Duration = Duration::minutes(15);
 const CYCLE: Duration = Duration::minutes(90);
@@ -14,30 +15,34 @@ impl CyclePair {
     }
 }
 
-pub fn get_wakeup_times(bedtime: &Time, format_options: &config::FormatOptions) -> Vec<CyclePair> {
+pub fn get_wakeup_times(bedtime: &Time, format_options: &FormatOptions) -> Vec<CyclePair> {
     let sleep_time = *bedtime + FALL_ASLEEP;
     (1..7u8).rev()
         .map(|i| {
-            let sleep_time = sleep_time + i*CYCLE;
-            let fmt_time = match i {
-                ..=4 => format!("{}", io::format_time(&sleep_time, format_options).unwrap()),
-                5.. => format!("{} (recommended!)", io::format_time(&sleep_time, format_options).unwrap())
+            let time_str = io::format_time(&(sleep_time + i*CYCLE), format_options)
+                .inspect_err(|e| eprintln!("Got error: {e}\nwhile formatting time: {sleep_time} ({i}th cycle)"))
+                .unwrap_or("Formatting failed! Check error logs and/or report an issue.".into());
+            let display_time = match i {
+                ..=4 => format!("{time_str}"),
+                5.. => format!("{time_str} (recommended!)")
             };
-            CyclePair(i, fmt_time)
+            CyclePair(i, display_time)
         })
         .collect()
 }
 
-pub fn get_bedtimes(waketime: &Time, format_options: &config::FormatOptions) -> Vec<CyclePair> {
-    let sleep_offset = *waketime - FALL_ASLEEP;
+pub fn get_bedtimes(waketime: &Time, format_options: &FormatOptions) -> Vec<CyclePair> {
+    let sleep_time = *waketime - FALL_ASLEEP;
     (1..7u8).rev()
         .map(|i| {
-            let sleep_time = sleep_offset - i*CYCLE;
-            let fmt_time = match i {
-                ..=4 => format!("{}", io::format_time(&sleep_time, format_options).unwrap()),
-                5.. => format!("{} (recommended!)", io::format_time(&sleep_time, format_options).unwrap())
+            let time_str = io::format_time(&(sleep_time - i*CYCLE), format_options)
+                .inspect_err(|e| eprintln!("Got error: {e}\nwhile formatting time: {sleep_time} ({i}th cycle)"))
+                .unwrap_or("Formatting failed! Check error logs and/or report an issue.".into());
+            let display_time = match i {
+                ..=4 => format!("{time_str}"),
+                5.. => format!("{time_str} (recommended!)")
             };
-            CyclePair(i, fmt_time)
+            CyclePair(i, display_time)
         })
         .collect()
 }
