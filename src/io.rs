@@ -14,6 +14,7 @@ pub fn parse_time(s: &str) -> Result<Time, TimeParseError> {
     let mut first_err = None;
     let fmts = [
         format_description!("[hour repr:12 padding:none]:[minute] [period case_sensitive:false]"),
+        format_description!("[hour repr:12 padding:none]:[minute][period case_sensitive:false]"),
         format_description!("[hour padding:none]:[minute]"),
     ];
 
@@ -37,7 +38,7 @@ pub fn format_time(t: &Time, format_options: &crate::config::FormatOptions) ->
         (false, true)   => format_description!("[hour padding:space repr:12]:[minute] [period case:upper]"),
         (false, false)  => format_description!("[hour padding:none repr:12]:[minute] [period case:upper]")
     };
-    Ok(t.format(fmt_desc)?)
+    t.format(fmt_desc)
 }
 
 pub fn build_table(rows: Vec<Vec<cli_table::CellStruct>>, times_col_title: &str)

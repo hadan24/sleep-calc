@@ -23,7 +23,7 @@ pub fn get_wakeup_times(bedtime: &Time, format_options: &FormatOptions) -> Vec<C
                 .inspect_err(|e| eprintln!("Got error: {e}\nwhile formatting time: {sleep_time} ({i}th cycle)"))
                 .unwrap_or("Formatting failed! Check error logs and/or report an issue.".into());
             let display_time = match i {
-                ..=4 => format!("{time_str}"),
+                ..=4 => time_str,
                 5.. => format!("{time_str} (recommended!)")
             };
             CyclePair(i, display_time)
@@ -39,7 +39,7 @@ pub fn get_bedtimes(waketime: &Time, format_options: &FormatOptions) -> Vec<Cycl
                 .inspect_err(|e| eprintln!("Got error: {e}\nwhile formatting time: {sleep_time} ({i}th cycle)"))
                 .unwrap_or("Formatting failed! Check error logs and/or report an issue.".into());
             let display_time = match i {
-                ..=4 => format!("{time_str}"),
+                ..=4 => time_str,
                 5.. => format!("{time_str} (recommended!)")
             };
             CyclePair(i, display_time)
