@@ -1,15 +1,12 @@
+use anyhow::Context;
 use time::{
     Time,
-    error::{
-        Format as TimeFormattingError,
-        Parse as TimeParseError
-    },
     macros::format_description
 };
 use cli_table::{format, Cell, Style, Table};
 
 
-pub fn parse_time(s: &str) -> Result<Time, TimeParseError> {
+pub fn parse_time(s: &str) -> anyhow::Result<Time> {
     let s = s.trim();
     let mut first_err = None;
     let fmts = [
@@ -25,12 +22,11 @@ pub fn parse_time(s: &str) -> Result<Time, TimeParseError> {
         };
     }
     
-    // only get here if NO formats matched, error guaranteed exists
-    Err(first_err.unwrap())
+    Err(first_err.unwrap().into())  // only here if NO formats matched, error guaranteed exists
 }
 
-pub fn format_time(t: &Time, format_options: &crate::config::FormatOptions) ->
-    Result<String, TimeFormattingError> 
+pub fn format_time(t: &Time, format_options: &crate::config::FormatOptions)
+    -> anyhow::Result<String>
 {
     let fmt_desc = match (format_options.mode24, format_options.with_padding) {
         (true, true)    => format_description!("[hour padding:space]:[minute]"),
@@ -38,22 +34,24 @@ pub fn format_time(t: &Time, format_options: &crate::config::FormatOptions) ->
         (false, true)   => format_description!("[hour padding:space repr:12]:[minute] [period case:upper]"),
         (false, false)  => format_description!("[hour padding:none repr:12]:[minute] [period case:upper]")
     };
-    t.format(fmt_desc)
+    let str = t.format(fmt_desc)
+        .context(format!("Could not format time: {t}"))?;
+    Ok(str)
 }
 
 pub fn build_table(rows: Vec<Vec<cli_table::CellStruct>>, times_col_title: &str)
-    -> cli_table::TableDisplay
+    -> anyhow::Result<cli_table::TableDisplay>
 {
     let sep = format::Separator::builder()
         .column(Some(format::VerticalLine::new('|')))
         .title(Some(format::HorizontalLine::new('+', '+', '+', '-')));
 
-    rows.table()
+    let tbl = rows.table()
         .title( vec!["Cycles".cell().bold(true), times_col_title.cell().bold(true)] )
         .separator(sep.build())
         .display()
-        .inspect_err(|e| eprintln!("Could not format table: {}", e))
-        .unwrap()   // if can't format, abort since std::io::Error is typically OS issue
+        .context("Could not format table for display")?;
+    Ok(tbl)
 }
 
 
@@ -105,7 +103,13 @@ mod tests {
     }
     #[test]
     fn parsing_invalid_time_fails() {
-        let input = parse_time("24:00 PM");
-        assert!(input.is_err());
+        assert!(parse_time("24:00 PM").is_err());
+    }
+
+    #[test]
+    fn parse_12hr_no_space_before_period() {
+        let input = parse_time("12:00AM").expect("Should be able to parse valid 12hr time");
+        let t = Time::from_hms(0, 0, 0).expect("Hard-coded Time should be valid");
+        assert_eq!(input, t);
     }
 }
