@@ -21,8 +21,8 @@ connection :)). This also lets me add some more features that I've been wanting.
 - [x] given a proposed bedtime and wake-up time, calculate how many cycles can fit in
 
 ### Other To-Do
-- [ ] separate concerns in `lib.rs` functions (return `Time`s, to be formatted into table form later)
-- [ ] transition `lib.rs` functions to `anyhow` instead of `eprintln` and default strings
+- [x] separate concerns in `lib.rs` functions (return `Time`s, to be formatted into table form later)
+- [x] transition `lib.rs` functions to `anyhow` instead of `eprintln` and default strings
 
 ## Resources For Myself
 - https://docs.rs/time/latest/time/

@@ -1,49 +1,25 @@
 pub mod config;
 pub mod io;
+pub mod error;
 
 use time::{Duration, Time};
-use cli_table::{format, Cell};
-use config::FormatOptions;
 
 const FALL_ASLEEP: Duration = Duration::minutes(15);
 const CYCLE: Duration = Duration::minutes(90);
 
-pub struct CyclePair(u8, String);
-impl CyclePair {
-    pub fn cell(self) -> Vec<cli_table::CellStruct> {
-        vec![self.0.cell().justify(format::Justify::Right), self.1.cell()]
-    }
-}
+pub struct CyclePair(u8, Time);
 
-pub fn get_wakeup_times(bedtime: &Time, format_options: &FormatOptions) -> Vec<CyclePair> {
+pub fn get_wakeup_times(bedtime: &Time) -> Vec<CyclePair> {
     let sleep_time = *bedtime + FALL_ASLEEP;
     (1..7u8).rev()
-        .map(|i| {
-            let time_str = io::format_time(&(sleep_time + i*CYCLE), format_options)
-                .inspect_err(|e| eprintln!("Got error: {e}\nwhile formatting time: {sleep_time} ({i}th cycle)"))
-                .unwrap_or("Formatting failed! Check error logs and/or report an issue.".into());
-            let display_time = match i {
-                ..=4 => time_str,
-                5.. => format!("{time_str} (recommended!)")
-            };
-            CyclePair(i, display_time)
-        })
+        .map(|i| CyclePair(i, sleep_time + i*CYCLE))
         .collect()
 }
 
-pub fn get_bedtimes(waketime: &Time, format_options: &FormatOptions) -> Vec<CyclePair> {
+pub fn get_bedtimes(waketime: &Time) -> Vec<CyclePair> {
     let sleep_time = *waketime - FALL_ASLEEP;
     (1..7u8).rev()
-        .map(|i| {
-            let time_str = io::format_time(&(sleep_time - i*CYCLE), format_options)
-                .inspect_err(|e| eprintln!("Got error: {e}\nwhile formatting time: {sleep_time} ({i}th cycle)"))
-                .unwrap_or("Formatting failed! Check error logs and/or report an issue.".into());
-            let display_time = match i {
-                ..=4 => time_str,
-                5.. => format!("{time_str} (recommended!)")
-            };
-            CyclePair(i, display_time)
-        })
+        .map(|i| CyclePair(i, sleep_time - i*CYCLE))
         .collect()
 }
 

@@ -1,4 +1,10 @@
 use anyhow::Context;
+use crate::{
+    CyclePair,
+    io,
+    config::FormatOptions,
+    error::*
+};
 use time::{
     Time,
     macros::format_description
@@ -25,7 +31,7 @@ pub fn parse_time(s: &str) -> anyhow::Result<Time> {
     Err(first_err.unwrap().into())  // only here if NO formats matched, error guaranteed exists
 }
 
-pub fn format_time(t: &Time, format_options: &crate::config::FormatOptions)
+pub fn format_time(t: &Time, format_options: &FormatOptions)
     -> anyhow::Result<String>
 {
     let fmt_desc = match (format_options.mode24, format_options.with_padding) {
@@ -39,12 +45,38 @@ pub fn format_time(t: &Time, format_options: &crate::config::FormatOptions)
     Ok(str)
 }
 
-pub fn build_table(rows: Vec<Vec<cli_table::CellStruct>>, times_col_title: &str)
+struct CycleDisplayPair(u8, String);
+impl CycleDisplayPair {
+    fn from_cycle_pair(p: CyclePair, fmt_opts: &FormatOptions) -> anyhow::Result<Self> {
+        let (i, t) = (p.0, p.1);
+        let time_str = io::format_time(&t, fmt_opts)
+            .context(format!("{FORMATTING_ERR_MSG} `{t}` ({i}th sleep cycle)"))?;
+        let display_time = match i {
+            ..=4 => time_str,
+            5.. => format!("{time_str} (recommended!)")
+        };
+
+        Ok(CycleDisplayPair(i, display_time))
+    }
+
+    fn cell(self) -> Vec<cli_table::CellStruct> {
+        vec![self.0.cell().justify(format::Justify::Right), self.1.cell()]
+    }
+}
+
+pub fn build_table(rows: Vec<CyclePair>, times_col_title: &str, fmt_opts: &FormatOptions)
     -> anyhow::Result<cli_table::TableDisplay>
 {
+    let rows: Vec<Vec<cli_table::CellStruct>> = rows.into_iter()
+        .map(|p| CycleDisplayPair::from_cycle_pair(p, fmt_opts) )
+        .collect::< anyhow::Result<Vec<CycleDisplayPair>> >()?
+        .into_iter()
+        .map(|p| p.cell())
+        .collect();
+
     let sep = format::Separator::builder()
         .column(Some(format::VerticalLine::new('|')))
-        .title(Some(format::HorizontalLine::new('+', '+', '+', '-')));
+        .title(Some(format::HorizontalLine::new('+', '+', '+', '~')));
 
     let tbl = rows.table()
         .title( vec!["Cycles".cell().bold(true), times_col_title.cell().bold(true)] )

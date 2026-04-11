@@ -1,11 +1,9 @@
 use anyhow::Context;
 use clap::Parser;
-use sleep_calc::*;
-
-const FORMATTING_ERR_MSG: &str = "Couldn't format time data:";
-const PARSING_ERR_MSG: &str = "Couldn't parse into time data:";
-const SUBMIT_PARSING_FMT_MSG: &str = "\n\tEnsure the given time is in an accepted format.    \
-    \n\tIf this input should be accepted as a new format, submit an issue.";
+use sleep_calc::{
+    *,
+    error::*
+};
 
 
 fn main() -> anyhow::Result<()> {
@@ -42,11 +40,10 @@ fn main() -> anyhow::Result<()> {
                 "Wake-up time: {}",
                 io::format_time(&waketime, &fmt_opts).context(format!("{FORMATTING_ERR_MSG} `{waketime}`"))?
             );
-            let cycles: Vec<CyclePair> = get_bedtimes(&waketime, &fmt_opts.padded());
-            let rows: Vec<_> = cycles.into_iter()
-                .map(|r| r.cell())
-                .collect();
-            println!("{}", io::build_table(rows, "Ideal Bedtimes")?);
+            let cycles = get_bedtimes(&waketime);
+            let tbl = io::build_table(cycles, "Ideal Bedtimes", &fmt_opts.padded())
+                .context(TABLE_FORMATTING_ERR_MSG)?;
+            println!("{tbl}");
         },
 
         // given chosen bedtime, calculate wakeup times
@@ -58,11 +55,10 @@ fn main() -> anyhow::Result<()> {
                 "Bedtime: {}",
                 io::format_time(&bedtime, &fmt_opts).context(format!("{FORMATTING_ERR_MSG} `{bedtime}`"))?
             );
-            let cycles: Vec<CyclePair> = get_wakeup_times(&bedtime, &fmt_opts.padded());
-            let rows: Vec<_> = cycles.into_iter()
-                .map(|r| r.cell())
-                .collect();
-            println!("{}", io::build_table(rows, "Ideal Wake Times")?);
+            let cycles = get_wakeup_times(&bedtime);
+            let tbl = io::build_table(cycles, "Ideal Wake Times", &fmt_opts.padded())
+                .context(TABLE_FORMATTING_ERR_MSG)?;
+            println!("{tbl}");
         },
 
         // default behavior: given bedtime of now, calculate wakeup times
@@ -75,11 +71,10 @@ fn main() -> anyhow::Result<()> {
                 "Bedtime: {}",
                 io::format_time(&now, &fmt_opts).context(format!("{FORMATTING_ERR_MSG} `{now}`"))?
             );
-            let cycles: Vec<CyclePair> = get_wakeup_times(&now, &fmt_opts.padded());
-            let rows: Vec<_> = cycles.into_iter()
-                .map(|r| r.cell())
-                .collect();
-            println!("{}", io::build_table(rows, "Wake-Up Time")?);
+            let cycles = get_wakeup_times(&now);
+            let tbl = io::build_table(cycles, "Ideal Wake Times", &fmt_opts.padded())
+                .context(TABLE_FORMATTING_ERR_MSG)?;
+            println!("{tbl}");
         }
     }
 
