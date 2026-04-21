@@ -7,21 +7,26 @@ use crate::{
 };
 use time::{
     Time,
-    macros::format_description
+    macros::format_description as fmt_desc
 };
 use cli_table::{format, Cell, Style, Table};
 
 
+const FMTS: [&[time::format_description::BorrowedFormatItem<'static>]; 8] = [
+    fmt_desc!("[hour repr:12 padding:none]:[minute] [period case_sensitive:false]"),    // 3:00 pm
+    fmt_desc!("[hour repr:12 padding:none]:[minute][period case_sensitive:false]"), // 3:00pm
+    fmt_desc!("[hour repr:12 padding:none] [period case_sensitive:false]"),         // 3 pm
+    fmt_desc!("[hour repr:12 padding:none][period case_sensitive:false]"),          // 3pm
+    fmt_desc!("[hour padding:none]:[minute]"),  // 15:00
+    fmt_desc!("[hour padding:none]"),           // 18
+    fmt_desc!("[hour padding:none][minute]"),   // 1500, 300
+    fmt_desc!("[hour padding:zero][minute]"),   // 1500, 0300
+];
 pub fn parse_time(s: &str) -> anyhow::Result<Time> {
     let s = s.trim();
     let mut first_err = None;
-    let fmts = [
-        format_description!("[hour repr:12 padding:none]:[minute] [period case_sensitive:false]"),
-        format_description!("[hour repr:12 padding:none]:[minute][period case_sensitive:false]"),
-        format_description!("[hour padding:none]:[minute]"),
-    ];
 
-    for f in fmts {
+    for f in FMTS {
         match Time::parse(s, f) {
             Ok(t) => return Ok(t),
             Err(e) => first_err.get_or_insert(e)
@@ -35,10 +40,10 @@ pub fn format_time(t: &Time, format_options: &FormatOptions)
     -> anyhow::Result<String>
 {
     let fmt_desc = match (format_options.mode24, format_options.with_padding) {
-        (true, true)    => format_description!("[hour padding:space]:[minute]"),
-        (true, false)   => format_description!("[hour padding:none]:[minute]"),
-        (false, true)   => format_description!("[hour padding:space repr:12]:[minute] [period case:upper]"),
-        (false, false)  => format_description!("[hour padding:none repr:12]:[minute] [period case:upper]")
+        (true, true)    => fmt_desc!("[hour padding:space]:[minute]"),
+        (true, false)   => fmt_desc!("[hour padding:none]:[minute]"),
+        (false, true)   => fmt_desc!("[hour padding:space repr:12]:[minute] [period case:upper]"),
+        (false, false)  => fmt_desc!("[hour padding:none repr:12]:[minute] [period case:upper]")
     };
     let str = t.format(fmt_desc)
         .context(format!("Could not format time: {t}"))?;

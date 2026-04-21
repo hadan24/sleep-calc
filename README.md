@@ -23,6 +23,9 @@ connection :)). This also lets me add some more features that I've been wanting.
 ### Other To-Do
 - [x] separate concerns in `lib.rs` functions (return `Time`s, to be formatted into table form later)
 - [x] transition `lib.rs` functions to `anyhow` instead of `eprintln` and default strings
+- [ ] personalization (messages, easter eggs)
+- [x] add "9" as acceptable format
+- [ ] 2 releases, 1 for cmd line, 1 for normal app
 
 ## Resources For Myself
 - https://docs.rs/time/latest/time/

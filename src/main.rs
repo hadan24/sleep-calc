@@ -9,6 +9,7 @@ use sleep_calc::{
 fn main() -> anyhow::Result<()> {
     let config = config::Config::parse();
     let fmt_opts = config.format_options().unpadded();
+    println!();
 
     match (config.bedtime, config.waketime) {
         // given bed & wakeup times, find how many cycles can fit
