@@ -26,6 +26,7 @@ connection :)). This also lets me add some more features that I've been wanting.
 - [ ] personalization (messages, easter eggs)
 - [x] add "9" as acceptable format
 - [ ] 2 releases, 1 for cmd line, 1 for normal app
+- [ ] let users store how long they typically/averagely take to fall asleep
 
 ## Resources For Myself
 - https://docs.rs/time/latest/time/
