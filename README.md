@@ -16,7 +16,10 @@ cycle. I hope it helps you too if you decide to use it!
 
 This is heavily inspired by https://sleepcalculator.com/, which I've been using for a while. 
 However, I wanted to make a CLI version so that I can calculate my sleep needs without an internet
-connection :)). This also lets me add some more features that I've been wanting.
+connection :)). This also lets me add some more features that I've been wanting. THIS particular
+branch is for the desktop app version, NOT the CLI app, in case anybody prefers it. Instead of
+accepting CLI arguments, the app accepts textual user input while running. All other functionality
+should be the same.
 
 ## Features
 - Given a set bedtime, calculates good wake-up times
