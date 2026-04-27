@@ -1,3 +1,5 @@
+use std::io::Write;
+
 use anyhow::Context;
 use crate::{
     config,
@@ -13,21 +15,26 @@ use time::{
 use cli_table::{format, Cell, Style, Table};
 
 
-const USER_INPUT_EXPECT: &str = "Failed to read input. Please try again.";
+fn read_user_input(mut buf: &mut String) -> anyhow::Result<()> {
+    print!("> ");   // to more clearly indicate user input lines
+    std::io::stdout().flush().context("Error while flushing output buffer before user input")?;
+    std::io::stdin().read_line(&mut buf).context("Failed to read input. Please try again.")?;
+    Ok(()) 
+}
 
 pub fn get_user_config() -> Result<config::Config, anyhow::Error> {
     let (mut b, mut w, mut m) = (String::new(), String::new(), String::new());
     println!("What time will you be in bed? (leave blank and press Enter/Return if n/a)");
-    std::io::stdin().read_line(&mut b).context(USER_INPUT_EXPECT)?;
+    read_user_input(&mut b)?;
     println!("What time would you like to wake up? (leave blank and press Enter/Return if n/a)");
-    std::io::stdin().read_line(&mut w).context(USER_INPUT_EXPECT)?;
+    read_user_input(&mut w)?;
 
     let mut mode = None;
     while mode.is_none() {
         println!("Which output format would you prefer?   \
             \n\t[1] 12-hour (i.e. 3:00 PM)  \
             \n\t[2] 24-hour (i.e. 15:00)");
-        std::io::stdin().read_line(&mut m).context(USER_INPUT_EXPECT)?;
+        read_user_input(&mut m)?;
         match m.trim().parse::<u8>() {
             Ok(1) | Ok(12) => mode = Some(false),
             Ok(2) | Ok(24) => mode = Some(true),

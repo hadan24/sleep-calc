@@ -2,7 +2,7 @@
 
 #### To-Do
 - [ ] add link where readers can learn more about sleep cycles
-- [ ] add `examples` code block + gif of output
+- [ ] add gif of output
 
 Have you ever thought you'd get a good night's sleep but somehow still wake up exhausted and
 sleepy? That may be due to _sleep cycles_! When we sleep, our brains go through specific cycles
