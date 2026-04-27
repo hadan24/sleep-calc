@@ -3,7 +3,7 @@ use crate::{
     CyclePair,
     io,
     config::FormatOptions,
-    error::*
+    error
 };
 use time::{
     Time,
@@ -55,7 +55,7 @@ impl CycleDisplayPair {
     fn from_cycle_pair(p: CyclePair, fmt_opts: &FormatOptions) -> anyhow::Result<Self> {
         let (i, t) = (p.0, p.1);
         let time_str = io::format_time(&t, fmt_opts)
-            .context(format!("{FORMATTING_ERR_MSG} `{t}` ({i}th sleep cycle)"))?;
+            .context(format!("{} `{t}` ({i}th sleep cycle)", error::FORMATTING_ERR_MSG))?;
         let display_time = match i {
             ..=4 => time_str,
             5.. => format!("{time_str} (recommended!)")
@@ -87,7 +87,7 @@ pub fn build_table(rows: Vec<CyclePair>, times_col_title: &str, fmt_opts: &Forma
         .title( vec!["Cycles".cell().bold(true), times_col_title.cell().bold(true)] )
         .separator(sep.build())
         .display()
-        .context("Could not format table for display")?;
+        .context("Could not create display-able table")?;
     Ok(tbl)
 }
 

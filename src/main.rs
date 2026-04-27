@@ -2,6 +2,7 @@ use anyhow::Context;
 use clap::Parser;
 use sleep_calc::{
     *,
+    io::*,
     error::*
 };
 
@@ -14,50 +15,51 @@ fn main() -> anyhow::Result<()> {
     match (config.bedtime, config.waketime) {
         // given bed & wakeup times, find how many cycles can fit
         (Some(given_bedtime), Some(given_waketime)) => {
-            let bedtime = io::parse_time(&given_bedtime)
-                .context(format!("{PARSING_ERR_MSG} `{given_bedtime}`. {SUBMIT_PARSING_FMT_MSG}"))?;
-            let waketime = io::parse_time(&given_waketime)
-                .context(format!("{PARSING_ERR_MSG} `{given_waketime}`. {SUBMIT_PARSING_FMT_MSG}"))?;
+            let bedtime = parse_time(&given_bedtime)
+                .context(parsing_context_msg(&given_bedtime))?;
+            let waketime = parse_time(&given_waketime)
+                .context(parsing_context_msg(&given_waketime))?;
             let (cycles, ideal_waketime) = {
                 let (c, t) = get_max_cycles_between(&bedtime, &waketime);
-                let t = io::format_time(&t, &fmt_opts)
-                    .context(format!("{FORMATTING_ERR_MSG} `{t}`"))?;
+                let t = format_time(&t, &fmt_opts)
+                    .context(formatting_context_msg(&t))?;
                 (c, t)
             };
+
             println!(
                 "Between {} and {}, you can get a maximum of: [{cycles}] cycles.",
-                io::format_time(&bedtime, &fmt_opts).context(format!("{FORMATTING_ERR_MSG} `{bedtime}`"))?,
-                io::format_time(&waketime, &fmt_opts).context(format!("{FORMATTING_ERR_MSG} `{waketime}`"))?
+                format_time(&bedtime, &fmt_opts).context(formatting_context_msg(&bedtime))?,
+                format_time(&waketime, &fmt_opts).context(formatting_context_msg(&waketime))?
             );
             println!("Try to wake up at: {ideal_waketime}.");
         },
 
         // given chosen wakeup time, calculate bedtimes
         (None, Some(given_waketime)) => {
-            let waketime = io::parse_time(&given_waketime)
-                .context(format!("{PARSING_ERR_MSG} `{given_waketime}`. {SUBMIT_PARSING_FMT_MSG}"))?;
+            let waketime = parse_time(&given_waketime)
+                .context(parsing_context_msg(&given_waketime))?;
 
             println!(
                 "Wake-up time: {}",
-                io::format_time(&waketime, &fmt_opts).context(format!("{FORMATTING_ERR_MSG} `{waketime}`"))?
+                format_time(&waketime, &fmt_opts).context(formatting_context_msg(&waketime))?
             );
             let cycles = get_bedtimes(&waketime);
-            let tbl = io::build_table(cycles, "Ideal Bedtimes", &fmt_opts.padded())
+            let tbl = build_table(cycles, "Ideal Bedtimes", &fmt_opts.padded())
                 .context(TABLE_FORMATTING_ERR_MSG)?;
             println!("{tbl}");
         },
 
         // given chosen bedtime, calculate wakeup times
         (Some(given_bedtime), None) => {
-            let bedtime = io::parse_time(&given_bedtime)
-                .context(format!("{PARSING_ERR_MSG} `{given_bedtime}`. {SUBMIT_PARSING_FMT_MSG}"))?;
+            let bedtime = parse_time(&given_bedtime)
+                .context(parsing_context_msg(&given_bedtime))?;
 
             println!(
                 "Bedtime: {}",
-                io::format_time(&bedtime, &fmt_opts).context(format!("{FORMATTING_ERR_MSG} `{bedtime}`"))?
+                format_time(&bedtime, &fmt_opts).context(formatting_context_msg(&bedtime))?,
             );
             let cycles = get_wakeup_times(&bedtime);
-            let tbl = io::build_table(cycles, "Ideal Wake Times", &fmt_opts.padded())
+            let tbl = build_table(cycles, "Ideal Wake Times", &fmt_opts.padded())
                 .context(TABLE_FORMATTING_ERR_MSG)?;
             println!("{tbl}");
         },
@@ -70,10 +72,10 @@ fn main() -> anyhow::Result<()> {
 
             println!(
                 "Bedtime: {}",
-                io::format_time(&now, &fmt_opts).context(format!("{FORMATTING_ERR_MSG} `{now}`"))?
+                format_time(&now, &fmt_opts).context(formatting_context_msg(&now))?,
             );
             let cycles = get_wakeup_times(&now);
-            let tbl = io::build_table(cycles, "Ideal Wake Times", &fmt_opts.padded())
+            let tbl = build_table(cycles, "Ideal Wake Times", &fmt_opts.padded())
                 .context(TABLE_FORMATTING_ERR_MSG)?;
             println!("{tbl}");
         }
