@@ -1,18 +1,10 @@
-use clap::Parser;
-
-#[derive(Parser, Debug)]
+#[derive(Debug)]
 pub struct Config {
-    #[arg(short, long)]
     pub bedtime: Option<String>,
-
-    #[arg(short, long)]
     pub waketime: Option<String>,
-
-    #[arg(short, long, default_value_t = false)]
     pub nap: bool,
 
     // 12-hour mode (default) or 24-hour mode
-    #[arg(short = 'm', long, default_value_t = false)]
     pub output_24hr_mode: bool
 }
 impl Config {
