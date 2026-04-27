@@ -12,15 +12,13 @@ use time::{
 use cli_table::{format, Cell, Style, Table};
 
 
-const FMTS: [&[time::format_description::BorrowedFormatItem<'static>]; 8] = [
-    fmt_desc!("[hour repr:12 padding:none]:[minute] [period case_sensitive:false]"),    // 3:00 pm
-    fmt_desc!("[hour repr:12 padding:none]:[minute][period case_sensitive:false]"), // 3:00pm
-    fmt_desc!("[hour repr:12 padding:none] [period case_sensitive:false]"),         // 3 pm
-    fmt_desc!("[hour repr:12 padding:none][period case_sensitive:false]"),          // 3pm
+const FMTS: [&[time::format_description::BorrowedFormatItem<'static>]; 6] = [
+    fmt_desc!("[hour repr:12 padding:none]:[minute][optional [ ]][period case_sensitive:false]"),    // 3:00 pm, 3:00pm
+    fmt_desc!("[hour repr:12]:[minute][optional [ ]][period case_sensitive:false]"),        // 03:00 pm, 03:00pm
+    fmt_desc!("[hour repr:12 padding:none][optional [ ]][period case_sensitive:false]"),    // 3 pm, 3pm
     fmt_desc!("[hour padding:none]:[minute]"),  // 15:00
-    fmt_desc!("[hour padding:none]"),           // 18
-    fmt_desc!("[hour padding:none][minute]"),   // 1500, 300
     fmt_desc!("[hour padding:zero][minute]"),   // 1500, 0300
+    fmt_desc!("[hour padding:none]"),   // 18
 ];
 pub fn parse_time(s: &str) -> anyhow::Result<Time> {
     let s = s.trim();
@@ -95,47 +93,50 @@ pub fn build_table(rows: Vec<CyclePair>, times_col_title: &str, fmt_opts: &Forma
 #[cfg(test)]
 mod tests {
     use super::*;
+    const PARSE_12HR_EXPECT: &str = "Should be able to parse valid 12hr time";
+    const PARSE_24HR_EXPECT: &str = "Should be able to parse valid 24hr time";
+    const HARD_CODED_TIME_EXPECT: &str = "Hard-coded Time should be valid";
 
     #[test]
     fn parse_12hr_am() {
-        let parsed = parse_time("8:00 AM").expect("Should be able to parse valid 12hr time");
-        let t = Time::from_hms(8, 0, 0).expect("Hard-coded Time should be valid");
+        let parsed = parse_time("8:00 AM").expect(PARSE_12HR_EXPECT);
+        let t = Time::from_hms(8, 0, 0).expect(HARD_CODED_TIME_EXPECT);
         assert_eq!(parsed, t);
     }
     #[test]
     fn parse_12hr_pm() {
-        let input = parse_time("8:00 PM").expect("Should be able to parse valid 12hr time");
-        let t = Time::from_hms(8 + 12, 0, 0).expect("Hard-coded Time should be valid");
+        let input = parse_time("8:00 PM").expect(PARSE_12HR_EXPECT);
+        let t = Time::from_hms(8 + 12, 0, 0).expect(HARD_CODED_TIME_EXPECT);
         assert_eq!(input, t);
     }
     #[test]
     fn parse_12hr_mixed_case() {
-        let input = parse_time("3:30 pM").expect("Should be able to parse valid 12hr time");
-        let t = Time::from_hms(3 + 12, 30, 0).expect("Hard-coded Time should be valid");
+        let input = parse_time("3:30 pM").expect(PARSE_12HR_EXPECT);
+        let t = Time::from_hms(3 + 12, 30, 0).expect(HARD_CODED_TIME_EXPECT);
         assert_eq!(input, t);
     }
     #[test]
     fn parse_12hr_midnight() {
-        let input = parse_time("12:00 AM").expect("Should be able to parse valid 12hr time");
-        let t = Time::from_hms(0, 0, 0).expect("Hard-coded Time should be valid");
+        let input = parse_time("12:00 AM").expect(PARSE_12HR_EXPECT);
+        let t = Time::from_hms(0, 0, 0).expect(HARD_CODED_TIME_EXPECT);
         assert_eq!(input, t);
     }
     #[test]
     fn parse_12hr_noon() {
-        let input = parse_time("12:00 PM").expect("Should be able to parse valid 12hr time");
-        let t = Time::from_hms(12, 0, 0).expect("Hard-coded Time should be valid");
+        let input = parse_time("12:00 PM").expect(PARSE_12HR_EXPECT);
+        let t = Time::from_hms(12, 0, 0).expect(HARD_CODED_TIME_EXPECT);
         assert_eq!(input, t);
     }
     #[test]
     fn parse_24hr_am() {
-        let input = parse_time("8:00").expect("Should be able to parse valid 24hr time");
-        let t = Time::from_hms(8, 0, 0).expect("Hard-coded Time should be valid");
+        let input = parse_time("8:00").expect(PARSE_24HR_EXPECT);
+        let t = Time::from_hms(8, 0, 0).expect(HARD_CODED_TIME_EXPECT);
         assert_eq!(input, t);
     }
     #[test]
     fn parse_24hr_pm() {
-        let input = parse_time("16:00").expect("Should be able to parse valid 24hr time");
-        let t = Time::from_hms(16, 0, 0).expect("Hard-coded Time should be valid");
+        let input = parse_time("16:00").expect(PARSE_24HR_EXPECT);
+        let t = Time::from_hms(16, 0, 0).expect(HARD_CODED_TIME_EXPECT);
         assert_eq!(input, t);
     }
     #[test]
@@ -145,8 +146,8 @@ mod tests {
 
     #[test]
     fn parse_12hr_no_space_before_period() {
-        let input = parse_time("12:00AM").expect("Should be able to parse valid 12hr time");
-        let t = Time::from_hms(0, 0, 0).expect("Hard-coded Time should be valid");
+        let input = parse_time("12:00AM").expect(PARSE_12HR_EXPECT);
+        let t = Time::from_hms(0, 0, 0).expect(HARD_CODED_TIME_EXPECT);
         assert_eq!(input, t);
     }
 }
