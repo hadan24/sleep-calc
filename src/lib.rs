@@ -4,6 +4,7 @@ pub mod error;
 
 use time::{Duration, Time};
 
+
 const FALL_ASLEEP: Duration = Duration::minutes(15);
 const CYCLE: Duration = Duration::minutes(90);
 

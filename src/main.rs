@@ -1,5 +1,5 @@
+use std::io::Read;
 use anyhow::Context;
-use clap::Parser;
 use sleep_calc::{
     *,
     io::*,
@@ -8,7 +8,8 @@ use sleep_calc::{
 
 
 fn main() -> anyhow::Result<()> {
-    let config = config::Config::parse();
+    println!();
+    let config = get_user_config()?;
     let fmt_opts = config.format_options().unpadded();
     println!();
 
@@ -81,5 +82,6 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
+    let _keep_term_open = std::io::stdin().read(&mut []);
     Ok(())
 }

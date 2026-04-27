@@ -1,5 +1,6 @@
 use anyhow::Context;
 use crate::{
+    config,
     CyclePair,
     io,
     config::FormatOptions,
@@ -11,6 +12,39 @@ use time::{
 };
 use cli_table::{format, Cell, Style, Table};
 
+
+const USER_INPUT_EXPECT: &str = "Failed to read input. Please try again.";
+
+pub fn get_user_config() -> Result<config::Config, anyhow::Error> {
+    let (mut b, mut w, mut m) = (String::new(), String::new(), String::new());
+    println!("What time will you be in bed? (leave blank and press Enter/Return if n/a)");
+    std::io::stdin().read_line(&mut b).context(USER_INPUT_EXPECT)?;
+    println!("What time would you like to wake up? (leave blank and press Enter/Return if n/a)");
+    std::io::stdin().read_line(&mut w).context(USER_INPUT_EXPECT)?;
+
+    let mut mode = None;
+    while mode.is_none() {
+        println!("Which output format would you prefer?   \
+            \n\t[1] 12-hour (i.e. 3:00 PM)  \
+            \n\t[2] 24-hour (i.e. 15:00)");
+        std::io::stdin().read_line(&mut m).context(USER_INPUT_EXPECT)?;
+        match m.trim().parse::<u8>() {
+            Ok(1) | Ok(12) => mode = Some(false),
+            Ok(2) | Ok(24) => mode = Some(true),
+            _ => {
+                println!("Please enter `1` or `2` to select an output mode.");
+                m.clear();
+            }
+        };
+    }
+
+    Ok(config::Config {
+        bedtime:    if b.trim().is_empty() { None } else { Some(b) },
+        waketime:   if w.trim().is_empty() { None } else { Some(w) },
+        nap:    false,
+        output_24hr_mode: mode.unwrap() // should be Some(), loop guarantees it
+    })
+}
 
 const FMTS: [&[time::format_description::BorrowedFormatItem<'static>]; 6] = [
     fmt_desc!("[hour repr:12 padding:none]:[minute][optional [ ]][period case_sensitive:false]"),    // 3:00 pm, 3:00pm
