@@ -34,17 +34,14 @@ pub fn parse_time(s: &str) -> anyhow::Result<Time> {
     Err(first_err.unwrap().into())  // only here if NO formats matched, error guaranteed exists
 }
 
-pub fn format_time(t: &Time, format_options: &FormatOptions)
-    -> anyhow::Result<String>
-{
+pub fn format_time(t: &Time, format_options: &FormatOptions) -> anyhow::Result<String> {
     let fmt_desc = match (format_options.mode24, format_options.with_padding) {
         (true, true)    => fmt_desc!("[hour padding:space]:[minute]"),
         (true, false)   => fmt_desc!("[hour padding:none]:[minute]"),
         (false, true)   => fmt_desc!("[hour padding:space repr:12]:[minute] [period case:upper]"),
         (false, false)  => fmt_desc!("[hour padding:none repr:12]:[minute] [period case:upper]")
     };
-    let str = t.format(fmt_desc)
-        .context(format!("Could not format time: {t}"))?;
+    let str = t.format(fmt_desc).context(format!("Could not format time: {t}"))?;
     Ok(str)
 }
 
