@@ -1,14 +1,14 @@
 # Sleep Calculator
 
 #### To-Do
-- [ ] add link where readers can learn more about sleep cycles
 - [ ] add gif of output
 
 Have you ever thought you'd get a good night's sleep but somehow still wake up exhausted and
-sleepy? That may be due to _sleep cycles_! When we sleep, our brains go through specific cycles
-to rest and restore itself. Those cycles have phases that last for specific time ranges, and
-waking up in the middle of the later phases of a cycle can make you feel just as tired as
-not getting any sleep at all!
+sleepy? That may be due to _sleep cycles_! When we sleep, our brains go through specific cycles to
+rest and restore itself, and waking up mid-cycle can make you feel just as tired as not getting any
+sleep at all. For more detailed information about these cycles, I recommend checking out
+[Sleep Foundation](https://www.sleepfoundation.org/stages-of-sleep) and
+[Wikipedia](https://en.wikipedia.org/wiki/Sleep_cycle).
 
 I deal with this a lot in my struggle to maintain a consistent sleep schedule (life, y'know? :/).
 This sleep calculator is a quick and easy way to help ensure I wake up at the right times in my
@@ -40,7 +40,7 @@ connection :)). This also lets me add some more features that I've been wanting.
 ```
 `-m` flag can also be given to any above invocation to activate 24-hour output mode
 
-### Example Accepted Time Formats
+### Some Accepted Time Formats
 ```
 "3:00 pm"   // arguments with spaces in between typically must be in quotes
 3:00pm
