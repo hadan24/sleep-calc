@@ -1,5 +1,3 @@
-use std::io::Write;
-
 use anyhow::Context;
 use crate::{
     config,
@@ -16,13 +14,14 @@ use cli_table::{format, Cell, Style, Table};
 
 
 fn read_user_input(mut buf: &mut String) -> anyhow::Result<()> {
+    use std::io::Write;
     print!("> ");   // to more clearly indicate user input lines
     std::io::stdout().flush().context("Error while flushing output buffer before user input")?;
     std::io::stdin().read_line(&mut buf).context("Failed to read input. Please try again.")?;
     Ok(()) 
 }
 
-pub fn get_user_config() -> Result<config::Config, anyhow::Error> {
+pub fn get_user_config() -> anyhow::Result<config::Config> {
     let (mut b, mut w, mut m) = (String::new(), String::new(), String::new());
     println!("What time will you be in bed? (leave blank and press Enter/Return if n/a)");
     read_user_input(&mut b)?;
@@ -75,17 +74,14 @@ pub fn parse_time(s: &str) -> anyhow::Result<Time> {
     Err(first_err.unwrap().into())  // only here if NO formats matched, error guaranteed exists
 }
 
-pub fn format_time(t: &Time, format_options: &FormatOptions)
-    -> anyhow::Result<String>
-{
+pub fn format_time(t: &Time, format_options: &FormatOptions) -> anyhow::Result<String> {
     let fmt_desc = match (format_options.mode24, format_options.with_padding) {
         (true, true)    => fmt_desc!("[hour padding:space]:[minute]"),
         (true, false)   => fmt_desc!("[hour padding:none]:[minute]"),
         (false, true)   => fmt_desc!("[hour padding:space repr:12]:[minute] [period case:upper]"),
         (false, false)  => fmt_desc!("[hour padding:none repr:12]:[minute] [period case:upper]")
     };
-    let str = t.format(fmt_desc)
-        .context(format!("Could not format time: {t}"))?;
+    let str = t.format(fmt_desc).context(format!("Could not format time: {t}"))?;
     Ok(str)
 }
 
