@@ -4,7 +4,7 @@ use crate::{
     CyclePair,
     io,
     config::FormatOptions,
-    error
+    error::*
 };
 use time::{
     Time,
@@ -13,43 +13,64 @@ use time::{
 use cli_table::{format, Cell, Style, Table};
 
 
-fn read_user_input(mut buf: &mut String) -> anyhow::Result<()> {
+fn read_user_input(prompt: &str, buf: &mut String) -> anyhow::Result<()> {
     use std::io::Write;
+    println!("{prompt}");
     print!("> ");   // to more clearly indicate user input lines
     std::io::stdout().flush().context("Error while flushing output buffer before user input")?;
-    std::io::stdin().read_line(&mut buf).context("Failed to read input. Please try again.")?;
+    buf.clear();    // ensure clean input
+    std::io::stdin().read_line(buf).context("Failed to read input. Please try again.")?;
     Ok(()) 
 }
 
 pub fn get_user_config() -> anyhow::Result<config::Config> {
-    let (mut b, mut w, mut m) = (String::new(), String::new(), String::new());
-    println!("What time will you be in bed? (leave blank and press Enter/Return if n/a)");
-    read_user_input(&mut b)?;
-    println!("What time would you like to wake up? (leave blank and press Enter/Return if n/a)");
-    read_user_input(&mut w)?;
+    let mut buf = String::new();
 
-    let mut mode = None;
-    while mode.is_none() {
-        println!("Which output format would you prefer?   \
+    let bedtime = loop {
+        read_user_input(
+            "What time will you be in bed? (leave blank and press Enter/Return if n/a)",
+            &mut buf
+        )?;
+
+        if buf.trim().is_empty() {
+            break None
+        }
+        match parse_time(&buf) {
+            Ok(t) => break Some(t),
+            Err(e) => println!("Error: {e}\n{}\n", parsing_context_msg(&buf))
+        }
+    };
+    let waketime = loop {
+        read_user_input(
+            "What time would you like to wake up? (leave blank and press Enter/Return if n/a)",
+            &mut buf
+        )?;
+
+        if buf.trim().is_empty() {
+            break None;
+        }
+        match parse_time(&buf) {
+            Ok(t) => break Some(t),
+            Err(e) => println!("Error: {e}\n{}\n", parsing_context_msg(&buf))
+        }
+    };
+
+    let output_24hr_mode = loop {
+        read_user_input(
+            "Which output format would you prefer?   \
             \n\t[1] 12-hour (i.e. 3:00 PM)  \
-            \n\t[2] 24-hour (i.e. 15:00)");
-        read_user_input(&mut m)?;
-        match m.trim().parse::<u8>() {
-            Ok(1) | Ok(12) => mode = Some(false),
-            Ok(2) | Ok(24) => mode = Some(true),
-            _ => {
-                println!("Please enter `1` or `2` to select an output mode.");
-                m.clear();
-            }
-        };
-    }
+            \n\t[2] 24-hour (i.e. 15:00)",
+            &mut buf
+        )?;
+        
+        match buf.trim().parse::<u8>() {
+            Ok(1) | Ok(12) => break false,
+            Ok(2) | Ok(24) => break true,
+            _ => println!("Please enter `1` or `2` to select an output mode.\n")
+        }
+    };
 
-    Ok(config::Config {
-        bedtime:    if b.trim().is_empty() { None } else { Some(b) },
-        waketime:   if w.trim().is_empty() { None } else { Some(w) },
-        nap:    false,
-        output_24hr_mode: mode.unwrap() // should be Some(), loop guarantees it
-    })
+    Ok(config::Config {bedtime, waketime, nap: false, output_24hr_mode })
 }
 
 const FMTS: [&[time::format_description::BorrowedFormatItem<'static>]; 6] = [
@@ -90,7 +111,7 @@ impl CycleDisplayPair {
     fn from_cycle_pair(p: CyclePair, fmt_opts: &FormatOptions) -> anyhow::Result<Self> {
         let (i, t) = (p.0, p.1);
         let time_str = io::format_time(&t, fmt_opts)
-            .context(format!("{} `{t}` ({i}th sleep cycle)", error::FORMATTING_ERR_MSG))?;
+            .context(format!("{} `{t}` ({i}th sleep cycle)", FORMATTING_ERR_MSG))?;
         let display_time = match i {
             ..=4 => time_str,
             5.. => format!("{time_str} (recommended!)")

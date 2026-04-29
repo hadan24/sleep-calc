@@ -15,11 +15,7 @@ fn main() -> anyhow::Result<()> {
 
     match (config.bedtime, config.waketime) {
         // given bed & wakeup times, find how many cycles can fit
-        (Some(given_bedtime), Some(given_waketime)) => {
-            let bedtime = parse_time(&given_bedtime)
-                .context(parsing_context_msg(&given_bedtime))?;
-            let waketime = parse_time(&given_waketime)
-                .context(parsing_context_msg(&given_waketime))?;
+        (Some(bedtime), Some(waketime)) => {
             let (cycles, ideal_waketime) = {
                 let (c, t) = get_max_cycles_between(&bedtime, &waketime);
                 let t = format_time(&t, &fmt_opts)
@@ -36,10 +32,7 @@ fn main() -> anyhow::Result<()> {
         },
 
         // given chosen wakeup time, calculate bedtimes
-        (None, Some(given_waketime)) => {
-            let waketime = parse_time(&given_waketime)
-                .context(parsing_context_msg(&given_waketime))?;
-
+        (None, Some(waketime)) => {
             println!(
                 "Wake-up time: {}",
                 format_time(&waketime, &fmt_opts).context(formatting_context_msg(&waketime))?
@@ -51,10 +44,7 @@ fn main() -> anyhow::Result<()> {
         },
 
         // given chosen bedtime, calculate wakeup times
-        (Some(given_bedtime), None) => {
-            let bedtime = parse_time(&given_bedtime)
-                .context(parsing_context_msg(&given_bedtime))?;
-
+        (Some(bedtime), None) => {
             println!(
                 "Bedtime: {}",
                 format_time(&bedtime, &fmt_opts).context(formatting_context_msg(&bedtime))?,

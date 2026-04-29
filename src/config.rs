@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub struct Config {
-    pub bedtime: Option<String>,
-    pub waketime: Option<String>,
+    pub bedtime: Option<time::Time>,
+    pub waketime: Option<time::Time>,
     pub nap: bool,
 
     // 12-hour mode (default) or 24-hour mode
