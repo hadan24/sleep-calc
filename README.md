@@ -1,8 +1,5 @@
 # Sleep Calculator
 
-#### To-Do
-- [ ] add gif of output
-
 Have you ever thought you'd get a good night's sleep but somehow still wake up exhausted and
 sleepy? That may be due to _sleep cycles_! When we sleep, our brains go through specific cycles to
 rest and restore itself, and waking up mid-cycle can make you feel just as tired as not getting any
@@ -23,6 +20,8 @@ connection :)). This also lets me add some more features that I've been wanting.
     - if invoked with no arguments, assumes the invocation time _is_ the set bedtime
 - Given a set wake-up time, calculates good bedtimes
 - Given both a bedtime _and_ wake-up time, calculates how many cycles can fit within those times and what a good wake-up time is (assuming you sleep at the given bedtime)
+
+![gif showing the result of calling the calculator with arguments `-w 6:30`](cli.gif)
 
 ## Examples
 ```
