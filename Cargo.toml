@@ -2,8 +2,25 @@
 name = "sleep-calc"
 version = "0.1.0"
 edition = "2024"
+# Github repo for CI support
+repository = "https://github.com/hadan24/sleep-calc"
+authors = ["Dan Ha<https://github.com/hadan24>"]
+# For homebrew
+description = "a CLI sleep calculator"
+homepage = "https://github.com/hadan24/sleep-calc"
+
+[package.metadata.wix]
+upgrade-guid = "C100C7A2-290D-4653-A69F-69BEE8E47E7F"
+path-guid = "DE303DEB-4016-4A9E-87C0-7F527C1BFCE8"
+license = false
+eula = false
 
 [dependencies]
 anyhow = "1.0.102"
 cli-table = "0.5.0"
 time = { version = "0.3.47", features = ["local-offset", "macros", "formatting", "parsing"] }
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
