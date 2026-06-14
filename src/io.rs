@@ -31,7 +31,10 @@ pub fn parse_time(s: &str) -> anyhow::Result<Time> {
         };
     }
     
-    Err(first_err.unwrap().into())  // only here if NO formats matched, error guaranteed exists
+    match first_err {
+        Some(e) => Err(e.into()),
+        None    => unreachable!()   // only here if NO formats matched, error guaranteed exists
+    }
 }
 
 pub fn format_time(t: &Time, format_options: &FormatOptions) -> anyhow::Result<String> {
